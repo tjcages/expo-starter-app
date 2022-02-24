@@ -17,12 +17,14 @@ const initialState = {
 
   publishPending: false,
   publishSuccess: false,
-  loadingState: true,
+  loadingState: false,
   theme: "system",
 };
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
+    case Types.UPDATE_LOADING_STATE:
+      return { ...state, loadingState: action.payload.loading }
     case Types.UPDATE_USER:
       return { ...state, user: action.payload.user };
     case Types.UDPATE_APP_THEME:
@@ -34,7 +36,7 @@ const reducer = (state = initialState, action) => {
     case Types.UPDATE_SITES:
       return { ...state, sites: action.payload.sites };
     case Types.SELECT_SITE:
-      return { ...state, selectedSite: action.payload.selectedSite };
+      return { ...state, selectedSite: action.payload.selectedSite, loadingState: false };
     case Types.UPDATE_DOMAINS:
       const domains = state.domains ?? {};
       domains[action.payload.site] = action.payload.domains;
@@ -47,26 +49,30 @@ const reducer = (state = initialState, action) => {
       );
       selectedDomains[changedIndex].selected = !action.payload.selected;
 
-      return { ...state, domains: currentDomains };
+      return { ...state, domains: currentDomains, loadingState: false };
     case Types.UPDATE_COLLECTIONS:
-      return { ...state, collections: action.payload.collections };
+      return { ...state, collections: action.payload.collections, loadingState: false };
     case Types.SELECT_COLLECTION:
       return {
         ...state,
         selectedCollection: action.payload.selectedCollection,
+        loadingState: false
       };
     case Types.UPDATE_COLLECTION_SCHEMA:
       const existingSchema = state.collectionSchema ?? [];
       const newSchema = [action.payload.collectionSchema];
       const finalSchema = existingSchema.concat(newSchema);
       return { ...state, collectionSchema: finalSchema };
+    
+    case Types.REPLACE_ITEMS: 
+      return { ...state, items: action.payload.newItems }
     case Types.UPDATE_ITEMS:
       const existingItems = state.items ?? [];
       const items = action.payload.items;
       if (items)
         items.map((item) => (item.collectionId = action.payload.collectionId));
       const newItems = existingItems.concat(items);
-      return { ...state, items: newItems };
+      return { ...state, items: newItems, loadingState: false };
     case Types.SELECT_ITEM:
       return { ...state, selectedItem: action.payload.selectedItem };
     case Types.CHANGE_ITEM_VALUES:
@@ -93,14 +99,16 @@ const reducer = (state = initialState, action) => {
         publishSuccess: action.payload.response,
         publishPending: false,
         changes: null,
+        loadingState: false,
       };
     case Types.PUBLISH_STATUS:
-      return { ...state, publishSuccess: action.payload.status };
+      return { ...state, publishSuccess: action.payload.status, loadingState: false };
     case Types.REVOKE_AUTHORIZATION:
       return {
         ...state,
         token: action.payload.token,
         authorization: action.payload.authorization,
+        loadingState: false,
       };
     case Types.REMOVE_ALL:
       return {
@@ -119,6 +127,7 @@ const reducer = (state = initialState, action) => {
         changes: null,
         publishPending: false,
         publishSuccess: false,
+        loadingState: false,
       };
     default:
       return state;

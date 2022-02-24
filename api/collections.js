@@ -22,7 +22,7 @@ export const listCollections = (bearer, siteId) => (dispatch) => {
     //If response is not in json then in error
     .catch((error) => {
       //Error
-      alert(JSON.stringify(error));
+      // alert(JSON.stringify(error));
       console.error(error);
     });
 };
@@ -63,7 +63,7 @@ export const getCollectionSchema = (bearer, collectionId) => (dispatch) => {
     //If response is not in json then in error
     .catch((error) => {
       //Error
-      alert(JSON.stringify(error));
+      // alert(JSON.stringify(error));
       console.error(error);
     });
 };

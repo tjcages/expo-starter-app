@@ -34,9 +34,25 @@ function ChangeItem(props) {
   const renderItem = (item) => {
     switch (item.type) {
       case "Bool":
-        return <SwitchItem {...props} item={editedField} />;
+        return (
+          <SwitchItem
+            {...props}
+            item={editedField}
+            newValue={newValue}
+            oldValue={oldValue}
+            revertChange={() => handleRevertChange(slug)}
+          />
+        );
       case "ImageRef":
-        return <ImageItem {...props} item={editedField} />;
+        return (
+          <ImageItem
+            {...props}
+            item={editedField}
+            newValue={newValue}
+            oldValue={oldValue}
+            revertChange={() => handleRevertChange(slug)}
+          />
+        );
       case "PlainText":
       case "RichText":
         return (
@@ -59,6 +75,7 @@ function ChangeItem(props) {
             item={editedField}
             newValue={newValue}
             oldValue={oldValue}
+            revertChange={() => handleRevertChange(slug)}
           />
         );
       case "Link":
@@ -68,6 +85,17 @@ function ChangeItem(props) {
             item={editedField}
             newValue={newValue}
             oldValue={oldValue}
+            revertChange={() => handleRevertChange(slug)}
+          />
+        );
+      case "Option":
+        return (
+          <OptionItem
+            {...props}
+            item={editedField}
+            newValue={newValue}
+            oldValue={oldValue}
+            revertChange={() => handleRevertChange(slug)}
           />
         );
       default:
@@ -160,58 +188,109 @@ const DateItem = (props) => {
 
   return (
     <View style={styles.container}>
-    <View style={styles.headerContainer}>
-      <Text style={styles.header}>
-        {props.item.name}{" "}
-        <Text style={[styles.header, { color: Colors.default.green }]}>
-          (changes)
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>
+          {props.item.name}{" "}
+          <Text style={[styles.header, { color: Colors.default.green }]}>
+            (changes)
+          </Text>
         </Text>
-      </Text>
-      <NavButton
-        style={{ fontSize: 16 }}
-        text="Revert"
-        lightColor={Colors.default.red}
-        darkColor={Colors.default.red}
-        onPress={() => createTwoButtonAlert(props.revertChange)}
-      />
+        <NavButton
+          style={{ fontSize: 16 }}
+          text="Revert"
+          lightColor={Colors.default.red}
+          darkColor={Colors.default.red}
+          onPress={() => createTwoButtonAlert(props.revertChange)}
+        />
+      </View>
+      <View style={{ marginBottom: 8, borderRadius: 6 }}>
+        <TextField
+          style={[
+            styles.slimTextfield,
+            {
+              borderColor: Colors.default.green,
+              backgroundColor: Colors.default.lightGreen,
+            },
+          ]}
+          multiline
+          scrollEnabled={false}
+          editable={false}
+          value={newDateString}
+        />
+      </View>
+      <View style={{ borderRadius: 6 }}>
+        <TextField
+          style={[
+            styles.slimTextfield,
+            {
+              borderColor: Colors.default.red,
+              backgroundColor: Colors.default.lightRed,
+            },
+          ]}
+          multiline
+          scrollEnabled={false}
+          editable={false}
+          value={oldDateString}
+        />
+      </View>
     </View>
-    <View style={{ marginBottom: 8, borderRadius: 6 }}>
-      <TextField
-        style={[
-          styles.slimTextfield,
-          {
-            borderColor: Colors.default.green,
-            backgroundColor: Colors.default.lightGreen,
-          },
-        ]}
-        multiline
-        scrollEnabled={false}
-        editable={false}
-        value={newDateString}
-      />
-    </View>
-    <View style={{ borderRadius: 6 }}>
-      <TextField
-        style={[
-          styles.slimTextfield,
-          {
-            borderColor: Colors.default.red,
-            backgroundColor: Colors.default.lightRed,
-          },
-        ]}
-        multiline
-        scrollEnabled={false}
-        editable={false}
-        value={oldDateString}
-      />
-    </View>
-  </View>
   );
 };
 
 const LinkItem = (props) => {
   return (
     <View style={styles.container}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>
+          {props.item.name}{" "}
+          <Text style={[styles.header, { color: Colors.default.green }]}>
+            (changes)
+          </Text>
+        </Text>
+        <NavButton
+          style={{ fontSize: 16 }}
+          text="Revert"
+          lightColor={Colors.default.red}
+          darkColor={Colors.default.red}
+          onPress={() => createTwoButtonAlert(props.revertChange)}
+        />
+      </View>
+      <View style={{ marginBottom: 8, borderRadius: 6 }}>
+        <TextField
+          style={[
+            styles.slimTextfield,
+            {
+              borderColor: Colors.default.green,
+              backgroundColor: Colors.default.lightGreen,
+            },
+          ]}
+          multiline
+          scrollEnabled={false}
+          editable={false}
+          value={props.newValue}
+        />
+      </View>
+      <View style={{ borderRadius: 6 }}>
+        <TextField
+          style={[
+            styles.slimTextfield,
+            {
+              borderColor: Colors.default.red,
+              backgroundColor: Colors.default.lightRed,
+            },
+          ]}
+          multiline
+          scrollEnabled={false}
+          editable={false}
+          value={props.oldValue}
+        />
+      </View>
+    </View>
+  );
+};
+
+const OptionItem = (props) => (
+  <View style={styles.container}>
     <View style={styles.headerContainer}>
       <Text style={styles.header}>
         {props.item.name}{" "}
@@ -258,8 +337,7 @@ const LinkItem = (props) => {
       />
     </View>
   </View>
-  );
-};
+);
 
 const PriceItem = (props) => (
   <View style={styles.container}>
@@ -287,71 +365,58 @@ const ImageItem = (props) => {
     return url.split(/[#?]/)[0].split(".").pop().trim();
   };
 
-  return props.item.value ? (
+  return (
     <View style={styles.container}>
-      <Text style={styles.header}>{props.item.name}</Text>
-      {getURLExtension(props.item.value.url) === "svg" ? (
-        <SvgUri style={styles.image} uri={props.item.value.url} />
-      ) : (
-        <Image
-          style={styles.image}
-          source={{
-            uri: props.item.value.url,
-          }}
-        />
-      )}
-      <View style={styles.imageActions}>
-        <Button
-          style={{ marginRight: 4, borderWidth: 1, borderColor: divider }}
-          lightColor={Colors.light.container}
-          darkColor={Colors.dark.highlight}
-          icon={
-            <Icon
-              style={{ marginRight: 8 }}
-              name="refresh-cw"
-              type="feather"
-              size={20}
-              color={secondary}
-            />
-          }
-          text="Replace"
-          textStyle="secondary"
-          flex
-        />
-        <Button
-          style={{ marginLeft: 4, borderWidth: 1, borderColor: divider }}
-          lightColor={Colors.light.container}
-          darkColor={Colors.dark.highlight}
-          icon={
-            <Icon
-              style={{ marginRight: 8 }}
-              name="trash"
-              type="feather"
-              size={20}
-              color={red}
-            />
-          }
-          text="Delete"
-          textColor={red}
-          flex
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>
+          {props.item.name}{" "}
+          <Text style={[styles.header, { color: Colors.default.green }]}>
+            (changes)
+          </Text>
+        </Text>
+        <NavButton
+          style={{ fontSize: 16 }}
+          text="Revert"
+          lightColor={Colors.default.red}
+          darkColor={Colors.default.red}
+          onPress={() => createTwoButtonAlert(props.revertChange)}
         />
       </View>
-    </View>
-  ) : (
-    <View style={styles.container}>
-      <Text style={styles.header}>{props.item.name}</Text>
-      <TouchableOpacity>
-        <Container style={styles.emptyImage}>
-          <Icon
-            style={{ marginBottom: 12 }}
-            name="image"
-            type="feather"
-            size={36}
-            color={secondary}
+      {props.newValue &&
+        (getURLExtension(props.newValue.uri) === "svg" ? (
+          <SvgUri
+            style={[
+              styles.image,
+              { marginBottom: 8, borderColor: Colors.default.green },
+            ]}
+            uri={props.newValue.uri}
           />
-          <Text style={{ fontWeight: "600" }}>Add an image</Text>
-        </Container>
-      </TouchableOpacity>
+        ) : (
+          <Image
+            style={[
+              styles.image,
+              { marginBottom: 8, borderColor: Colors.default.green },
+            ]}
+            source={{
+              uri: props.newValue.uri,
+            }}
+          />
+        ))}
+      {props.oldValue &&
+        props.oldValue.url &&
+        (getURLExtension(props.oldValue.url) === "svg" ? (
+          <SvgUri
+            style={[styles.image, { borderColor: Colors.default.red }]}
+            uri={props.oldValue.url}
+          />
+        ) : (
+          <Image
+            style={[styles.image, { borderColor: Colors.default.red }]}
+            source={{
+              uri: props.oldValue.url,
+            }}
+          />
+        ))}
     </View>
   );
 };
@@ -364,27 +429,38 @@ const SwitchItem = (props) => {
   );
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          flexDirection: "column",
-          flex: 1,
-          backgroundColor: "transparent",
-        }}
-      >
-        <Text style={styles.header}>{props.item.name}</Text>
-        {props.item.description && (
-          <Text style={{ marginTop: 8, flex: 1, flexWrap: "wrap" }}>
-            {props.item.description}
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>
+          {props.item.name}{" "}
+          <Text style={[styles.header, { color: Colors.default.green }]}>
+            (changes)
           </Text>
-        )}
+        </Text>
+        <NavButton
+          style={{ fontSize: 16 }}
+          text="Revert"
+          lightColor={Colors.default.red}
+          darkColor={Colors.default.red}
+          onPress={() => createTwoButtonAlert(props.revertChange)}
+        />
       </View>
-      <Switch
-        trackColor={{ false: container, true: Colors.default.green }}
-        thumbColor={"white"}
-        ios_backgroundColor={{ false: secondary, true: Colors.default.green }}
-        onChange={() => props.item.action()}
-        value={props.item.value}
-      />
+      <Container style={styles.switchContainer}>
+        <Switch
+          trackColor={{ false: container, true: Colors.default.green }}
+          thumbColor={"white"}
+          ios_backgroundColor={{ false: secondary, true: Colors.default.green }}
+          value={props.oldValue}
+          disabled
+        />
+        <Text style={{ marginHorizontal: 16 }}>to</Text>
+        <Switch
+          trackColor={{ false: container, true: Colors.default.green }}
+          thumbColor={"white"}
+          ios_backgroundColor={{ false: secondary, true: Colors.default.green }}
+          value={props.newValue}
+          disabled
+        />
+      </Container>
     </View>
   );
 };
@@ -438,19 +514,14 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 264,
     borderRadius: 6,
+    borderWidth: 2,
+    overflow: "hidden",
+    maxWidth: "100%",
   },
-  imageActions: {
+  switchContainer: {
     flex: 1,
     flexDirection: "row",
-    marginVertical: 12,
-  },
-  emptyImage: {
-    flex: 1,
-    flexDirection: "column",
-    justifyContent: "center",
     alignItems: "center",
-    height: 200,
-    borderRadius: 6,
   },
 });
 

@@ -27,7 +27,7 @@ export const getAccessToken = (code) => (dispatch) => {
     .catch((error) => {
       //Error
       console.log("Error getting access token: " + error.message);
-      alert(JSON.stringify(error));
+      // alert(JSON.stringify(error));
       return dispatch({
         type: Types.UPDATE_WEBFLOW_TOKEN,
         payload: { token: null },
@@ -56,7 +56,7 @@ export const getCurrentAuthorizationInfo = (bearer) => (dispatch) => {
     //If response is not in json then in error
     .catch((error) => {
       //Error
-      alert(JSON.stringify(error));
+      // alert(JSON.stringify(error));
       console.error(error);
     });
 };
@@ -90,7 +90,7 @@ export const revokeAuthToken = (bearer) => (dispatch) => {
     //If response is not in json then in error
     .catch((error) => {
       //Error
-      alert(JSON.stringify(error));
+      // alert(JSON.stringify(error));
       console.error(error);
     });
 };
@@ -118,14 +118,14 @@ export const getCurrentAuthorizedUser = (bearer) => (dispatch) => {
         .catch((error) => {
           //Error
           console.log("Error saving to Firestore");
-          alert(JSON.stringify(error));
+          // alert(JSON.stringify(error));
           console.error(error);
         });
     })
     //If response is not in json then in error
     .catch((error) => {
       //Error
-      alert(JSON.stringify(error));
+      // alert(JSON.stringify(error));
       console.error(error);
     });
 };

@@ -15,6 +15,7 @@ export const SELECT_COLLECTION = "select_collection"
 export const UPDATE_COLLECTION_SCHEMA = "update_collections_schema"
 
 export const UPDATE_ITEMS = "update_items"
+export const REPLACE_ITEMS = "replace_items"
 export const SELECT_ITEM = "select_item"
 export const CHANGE_ITEM_VALUES = "change_item_values"
 export const REMOVE_ITEM_CHANGE = "remove_item_change"

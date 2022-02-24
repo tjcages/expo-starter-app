@@ -21,7 +21,7 @@ export const listSites = (bearer) => (dispatch) => {
     //If response is not in json then in error
     .catch((error) => {
       //Error
-      alert(JSON.stringify(error));
+      // alert(JSON.stringify(error));
       console.error(error);
     });
 };
@@ -75,7 +75,7 @@ export const listDomains = (bearer, site) => (dispatch) => {
     //If response is not in json then in error
     .catch((error) => {
       //Error
-      alert(JSON.stringify(error));
+      // alert(JSON.stringify(error));
       console.error(error);
     });
 };
@@ -113,7 +113,7 @@ export const publishSite = (bearer, siteId, domains) => (dispatch) => {
     //If response is not in json then in error
     .catch((error) => {
       //Error
-      alert(JSON.stringify(error));
+      // alert(JSON.stringify(error));
       console.error(error);
     });
 };
@@ -127,10 +127,10 @@ export const updatePublishStatus = (status) => (dispatch) => {
 
 function sortSites(a, b) {
   // return the most recently published sites first
-  if (a.lastPublished > b.lastPublished) {
+  if (a.lastPublished > b.lastPublished || b.lastPublished === null) {
     return -1;
   }
-  if (a.lastPublished < b.lastPublished) {
+  if (a.lastPublished < b.lastPublished || a.lastPublished === null) {
     return 1;
   }
   return 0;

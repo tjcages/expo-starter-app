@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import * as Analytics from "expo-firebase-analytics";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import getEnvVars from "../environment";
@@ -52,6 +53,8 @@ const Login = (props) => {
   );
 
   useEffect(() => {
+    Analytics.logEvent("screen_view", { screen_name: props.route.name });
+    
     if (response && response.type === "success") {
       props.getAccessToken(response.params.code);
     }
@@ -64,8 +67,8 @@ const Login = (props) => {
         source={{
           uri:
             theme === "dark"
-              ? "https://my.spline.design/webflowcms-4faa9dcf1025db743529ff02d1e0db31/"
-              : "https://my.spline.design/webflowcmscopy-2a820586230af098b9306dd89839469a/",
+              ? "https://my.spline.design/girlgumbubblewebflowcmsmobile-d8949a7d244731b564ad23100ccc7435/"
+              : "https://my.spline.design/primitiveswebflowcmsmobile-b1e9d9c8a4d4126bce17da4ef94e0f0f/",
         }}
       />
       <View style={styles.content}>
@@ -99,6 +102,7 @@ const styles = StyleSheet.create({
   },
   webview: {
     flex: 1,
+    backgroundColor: "transparent",
   },
   blur: {
     position: "absolute",

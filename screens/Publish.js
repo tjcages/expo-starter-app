@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import * as Analytics from "expo-firebase-analytics";
 import { StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { connect } from "react-redux";
@@ -16,6 +17,8 @@ import PublishSuccess from "../shared/PublishSuccess";
 
 const Publish = (props) => {
   useEffect(() => {
+    Analytics.logEvent("screen_view", { screen_name: props.route.name });
+
     // setup navigation header options
     props.navigation.setOptions({
       headerRight: () => (
@@ -36,7 +39,7 @@ const Publish = (props) => {
         const changes = Object.assign(...itemChanges.changes);
 
         // make the request to update each collection item
-        props.publishItemChange(props.token, collectionId, item, changes);
+        props.publishItemChange(props.token, collectionId, item, changes, props.user.id);
       });
     });
   };
@@ -86,7 +89,7 @@ const Publish = (props) => {
       {/* Use a light status bar on iOS to account for the black space above the modal */}
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
 
-      {props.publishPending && (
+      {props.publishPending || props.loadingState && (
         <View style={styles.overlay}>
           <ActivityIndicator />
         </View>

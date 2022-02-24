@@ -20,9 +20,9 @@ const SchemaItem = (props) => {
   const renderItem = (item) => {
     switch (item.type) {
       case "Bool":
-        return <SwitchItem {...props} />;
+        return <SwitchItem {...props} value={value} setValue={setValue} />;
       case "ImageRef":
-        return <ImageItem {...props} />;
+        return <ImageItem {...props} value={value} setValue={setValue} />;
       case "PlainText":
       case "RichText":
         return <TextItem {...props} value={value} setValue={setValue} />;
@@ -37,7 +37,7 @@ const SchemaItem = (props) => {
       case "Option":
         return <OptionItem {...props} value={value} setValue={setValue} />;
       default:
-        return <Text>Need to do – {item.type}</Text>;
+        return <ComingSoon {...props} value={value} setValue={setValue} />;
     }
   };
 
@@ -113,36 +113,77 @@ const LinkItem = (props) => {
 };
 
 const OptionItem = (props) => {
-  const [open, setOpen] = useState(false);
-  console.log(props.item);
+  const color = useThemeColor({}, "primary");
+  const secondary = useThemeColor({}, "secondary");
+  const backgroundColor = useThemeColor(
+    { light: Colors.light.container, dark: Colors.dark.highlight },
+    "highlight"
+  );
+  const highlight = useThemeColor(
+    { light: Colors.light.background, dark: Colors.dark.container },
+    "highlight"
+  );
+
   var items = [];
   if (
     props.item.validations &&
     props.item.validations.options &&
     props.item.validations.options.length > 0
   )
-    items = props.item.validations.options.map((option) => {
-      return {
-        label: option.name,
-        value: option.id,
-      };
-    });
+    items = props.item.validations.options;
+  const selectedOption = items.find((option) => option.id === props.value);
 
   return (
-    <View style={[styles.container, { zIndex: 100 }]}>
+    <View style={styles.container}>
       <Text style={styles.header}>{props.item.name}</Text>
-      {/* <ContextMenu
-        actions={[{ title: "Title 1" }, { title: "Title 2" }]}
-        onPress={(e) => {
-          console.warn(
-            `Pressed ${e.nativeEvent.name} at index ${e.nativeEvent.index}`
-          );
-        }}
+      <TouchableOpacity
+        onPress={() =>
+          props.navigation.push("Options", {
+            data: items,
+            title: props.item.name,
+            onSelected: (id) => {
+              props.setValue(id);
+              props.updateItemValue(props.selectedItem, props.item.slug, id);
+            },
+          })
+        }
       >
-        <Container style={{ zIndex: 100 }}>
-          <Text>Heyy</Text>
+        <Container style={[styles.option, { backgroundColor }]}>
+          <Container
+            style={[styles.optionSelected, { backgroundColor: highlight }]}
+          >
+            <Text style={[styles.optionText, { color }]}>
+              {selectedOption.name}
+            </Text>
+          </Container>
+          <Icon
+            name="chevron-right"
+            type="feather"
+            size={20}
+            color={secondary}
+          />
         </Container>
-      </ContextMenu> */}
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const ComingSoon = (props) => {
+  // REFS TO DO
+  const secondary = useThemeColor({}, "secondary");
+  const backgroundColor = useThemeColor(
+    { light: Colors.light.container, dark: Colors.dark.highlight },
+    "highlight"
+  );
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>{props.item.name}</Text>
+      <Container style={[styles.comingSoon, { backgroundColor }]}>
+        <Text style={[styles.optionText, { color: secondary }]}>
+          Coming soon!
+        </Text>
+      </Container>
     </View>
   );
 };
@@ -185,18 +226,41 @@ const ImageItem = (props) => {
 
     if (!result.cancelled) {
       setImage(result.uri);
+
+      const imageObj = {
+        status: "upload",
+        uri: result.uri,
+      };
+      props.setValue(imageObj);
+      props.updateItemValue(props.selectedItem, props.item.slug, imageObj);
     }
   };
-  return props.item.value ? (
+
+  return props.value ? (
     <View style={styles.container}>
       <Text style={styles.header}>{props.item.name}</Text>
-      {getURLExtension(props.item.value.url) === "svg" ? (
-        <SvgUri style={styles.image} uri={props.item.value.url} />
+      {getURLExtension(
+        props.value !== null && props.value.url !== undefined
+          ? props.value.url
+          : props.value.uri
+      ) === "svg" ? (
+        <SvgUri
+          style={styles.image}
+          uri={
+            props.value !== null && props.value.url !== undefined
+              ? props.value.url
+              : props.value.uri
+          }
+        />
       ) : (
         <Image
           style={styles.image}
           source={{
-            uri: image ? image : props.item.value.url,
+            uri: image
+              ? image
+              : props.value !== null && props.value.url !== undefined
+              ? props.value.url
+              : props.value.uri
           }}
         />
       )}
@@ -235,13 +299,17 @@ const ImageItem = (props) => {
           text="Delete"
           textColor={red}
           flex
+          onPress={() => {
+            props.setValue(null);
+            props.updateItemValue(props.selectedItem, props.item.slug, null);
+          }}
         />
       </View>
     </View>
   ) : (
     <View style={styles.container}>
       <Text style={styles.header}>{props.item.name}</Text>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={pickImage}>
         <Container style={styles.emptyImage}>
           <Icon
             style={{ marginBottom: 12 }}
@@ -283,8 +351,15 @@ const SwitchItem = (props) => {
         trackColor={{ false: container, true: Colors.default.green }}
         thumbColor={"white"}
         ios_backgroundColor={{ false: secondary, true: Colors.default.green }}
-        onChange={() => props.item.action()}
-        value={props.item.value}
+        value={props.value}
+        onChange={() => {
+          props.setValue(!props.value);
+          props.updateItemValue(
+            props.selectedItem,
+            props.item.slug,
+            !props.value
+          );
+        }}
       />
     </View>
   );
@@ -339,6 +414,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 200,
     borderRadius: 6,
+  },
+  option: {
+    position: "relative",
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderRadius: 6,
+    paddingTop: 8,
+    paddingBottom: 8,
+    paddingHorizontal: 12,
+  },
+  optionSelected: {
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  optionText: {
+    fontSize: 18,
+  },
+  comingSoon: {
+    flex: 1,
+    borderRadius: 6,
+    paddingTop: 12,
+    paddingBottom: 12,
+    paddingHorizontal: 16,
   },
 });
 

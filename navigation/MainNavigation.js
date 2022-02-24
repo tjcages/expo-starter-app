@@ -8,13 +8,14 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { getTheme } from "../components";
 
-import Home from "../screens/Home";
+import Sites from "../screens/Sites";
 import Collections from "../screens/Collections";
 import Items from "../screens/Items";
 import EditItem from "../screens/EditItem";
 import Publish from "../screens/Publish";
 import Settings from "../screens/Settings";
 import Appearance from "../screens/Appearance";
+import Options from "../screens/Options";
 
 const HomeStack = createNativeStackNavigator();
 
@@ -30,7 +31,7 @@ const Navigation = (props) => {
           headerBlurEffect: theme,
         }}
       >
-        <HomeStack.Screen name="Sites" component={Home} />
+        <HomeStack.Screen name="Sites" component={Sites} />
         <HomeStack.Screen name="Collections" component={Collections} />
         <HomeStack.Screen name="Items" component={Items} />
         <HomeStack.Screen name="EditItem" component={EditItem} />
@@ -46,6 +47,7 @@ const Navigation = (props) => {
           <HomeStack.Screen name="Publish" component={Publish} />
           <HomeStack.Screen name="Settings" component={Settings} />
           <HomeStack.Screen name="Appearance" component={Appearance} />
+          <HomeStack.Screen name="Options" component={Options} />
         </HomeStack.Group>
       </HomeStack.Navigator>
     </NavigationContainer>

@@ -38,10 +38,7 @@ class Controller extends React.Component {
 
     if (this.props.token && tokenChanged)
       this.props.getCurrentAuthorizationInfo(this.props.token);
-    if (
-      this.props.authorization &&
-      authorizationChanged
-    )
+    if (this.props.authorization && authorizationChanged)
       this.props.getCurrentAuthorizedUser(this.props.token);
 
     // if we are currently authorized, allow other requests
@@ -54,15 +51,24 @@ class Controller extends React.Component {
         this.props.listSites(this.props.token);
       }
 
+      // load domains
+      if (this.props.sites) {
+        this.props.sites.map((site) => {
+          if (this.props.domains === null || this.props.domains[site] === null) {
+            this.props.listDomains(this.props.token, site);
+          }
+        });
+      }
+
       // load collections
       if (this.props.selectedSite && this.props.collections === null) {
         this.props.listCollections(this.props.token, this.props.selectedSite);
 
-        const sites = this.props.sites ?? [];
-        const selectedSite = sites.find(
-          (s) => s._id === this.props.selectedSite
-        );
-        this.props.listDomains(this.props.token, selectedSite);
+        // const sites = this.props.sites ?? [];
+        // const selectedSite = sites.find(
+        //   (s) => s._id === this.props.selectedSite
+        // );
+        // this.props.listDomains(this.props.token, selectedSite);
       }
 
       // load items

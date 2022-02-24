@@ -1,33 +1,45 @@
+import firebase from "firebase";
 import * as Types from "../store/types";
+const storage = firebase.storage();
 
-export const getAllCollectionItems = (bearer, collectionId) => (dispatch) => {
-  //GET request
-  fetch(`https://api.webflow.com/collections/${collectionId}/items`, {
-    method: "GET",
-    headers: {
-      "Accept-Version": "1.0.0",
-      Authorization: `Bearer ${bearer}`,
-    },
-  })
-    .then((response) => response.json())
-    //If response is in json then in success
-    .then((responseJson) => {
-      //Success
-      return dispatch({
-        type: Types.UPDATE_ITEMS,
-        payload: {
-          items: responseJson.items.sort(sortItems),
-          collectionId: collectionId,
-        },
-      });
+export const getAllCollectionItems =
+  (bearer, collectionId, replace = false) =>
+  (dispatch) => {
+    //GET request
+    fetch(`https://api.webflow.com/collections/${collectionId}/items`, {
+      method: "GET",
+      headers: {
+        "Accept-Version": "1.0.0",
+        Authorization: `Bearer ${bearer}`,
+      },
     })
-    //If response is not in json then in error
-    .catch((error) => {
-      //Error
-      alert(JSON.stringify(error));
-      console.error(error);
-    });
-};
+      .then((response) => response.json())
+      //If response is in json then in success
+      .then((responseJson) => {
+        //Success
+        if (replace) {
+          return dispatch({
+            type: Types.REPLACE_ITEMS,
+            payload: {
+              items: responseJson.items.sort(sortItems),
+            },
+          });
+        }
+        return dispatch({
+          type: Types.UPDATE_ITEMS,
+          payload: {
+            items: responseJson.items.sort(sortItems),
+            collectionId: collectionId,
+          },
+        });
+      })
+      //If response is not in json then in error
+      .catch((error) => {
+        //Error
+        // alert(JSON.stringify(error));
+        console.error(error);
+      });
+  };
 
 export const selectItem = (itemId) => (dispatch) => {
   if (itemId) {
@@ -59,11 +71,31 @@ export const revertChange = (key, slug) => (dispatch) => {
 };
 
 export const publishItemChange =
-  (bearer, collectionId, item, changes) => (dispatch) => {
-    const updates = {
-      ...item,
-      ...changes,
-    };
+  (bearer, collectionId, item, changes, userId) => async (dispatch) => {
+    // start loading
+    dispatch({
+      type: Types.UPDATE_LOADING_STATE,
+      payload: { loading: true },
+    });
+
+    var updates = Object.assign({}, item);
+    const promises = Object.keys(changes).map(async function (key, index) {
+      var change = changes[key];
+      if (change && change.status === "upload") {
+        // an image, upload to storage first
+        change = await uploadImageToStorage(change, userId);
+      }
+      var obj = {};
+      obj[key] = change;
+      return obj;
+    });
+    const updatedChanges = await Promise.all(promises);
+    updatedChanges.map((update) => {
+      updates = {
+        ...updates,
+        ...update,
+      };
+    });
 
     // delete uneditable or unused fields
     delete updates.collectionId;
@@ -92,17 +124,23 @@ export const publishItemChange =
       .then((response) => response.json())
       //If response is in json then in success
       .then((responseJson) => {
-        //Success
         console.log(responseJson);
-        return dispatch({
-          type: Types.PUBLISH_PENDING,
-          payload: { pending: true },
-        });
+        //Success
+        return [
+          dispatch({
+            type: Types.PUBLISH_PENDING,
+            payload: { pending: true },
+          }),
+          dispatch({
+            type: Types.UPDATE_LOADING_STATE,
+            payload: { loading: false },
+          }),
+        ];
       })
       //If response is not in json then in error
       .catch((error) => {
         //Error
-        alert(JSON.stringify(error));
+        // alert(JSON.stringify(error));
         console.error(error);
       });
   };
@@ -116,4 +154,25 @@ function sortItems(a, b) {
     return 1;
   }
   return 0;
+}
+
+async function uploadImageToStorage(image, userId) {
+  return new Promise(async (resolve, reject) => {
+    const response = await fetch(image.uri);
+    const blob = await response.blob();
+    // create a filename
+    const filename =
+      "images/" +
+      `${userId}_` +
+      image.uri.substring(image.uri.lastIndexOf("/") + 1);
+    // create a lightweight storage ref
+    const storageRef = storage.ref().child(filename);
+    // retrieve accessible url
+
+    // storageRef.put(blob);
+    await storageRef.put(blob);
+    const downloadURL = await storageRef.getDownloadURL();
+
+    resolve(downloadURL);
+  });
 }

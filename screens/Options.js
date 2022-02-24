@@ -1,57 +1,63 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import * as Analytics from "expo-firebase-analytics";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { StatusBar } from "expo-status-bar";
 import { Platform, StyleSheet } from "react-native";
 
-import { updateAppTheme } from "../api/app";
+import { updateAppTheme } from "../api/app"
 
-import { View, Container, NavButton } from "../components";
+import {
+  View,
+  Container,
+  NavButton
+} from "../components";
 import AppearanceList from "../views/AppearanceList";
 
-const Appearance = (props) => {
+const Options = (props) => {
+  const [settings, setSettings] = useState([])
+
   useEffect(() => {
     Analytics.logEvent("screen_view", { screen_name: props.route.name });
-    // setup navigation header options
-    props.navigation.setOptions({
-      headerRight: () => (
-        <NavButton onPress={() => props.navigation.goBack()} text="Done" />
-      ),
-    });
-  }, []);
 
-  const settings = [
+    const items = props.route.params.data
+    const newSettings = [
     {
-      category: "Appearance",
-      data: [
-        {
-          title: "System",
-          description: "Match your iOS appearance",
+      category: "Options",
+      data: items.map(item => {
+        return {
+          title: item.name,
+          description: item.id,
           type: "option",
-          action: () => setSystemTheme("system"),
-        },
-        {
-          title: "Dark",
-          type: "option",
-          action: () => setSystemTheme("dark"),
-        },
-        {
-          title: "Light",
-          type: "option",
-          action: () => setSystemTheme("light"),
-        },
-      ],
+          action: () => {
+            props.route.params.onSelected(item.id)
+            props.navigation.pop(1)  
+          }
+        }
+      }),
     },
   ];
+  setSettings(newSettings)
+  
+    // setup navigation header options
+    props.navigation.setOptions({
+      title: props.route.params.title,
+      headerRight: () => (
+        <NavButton
+          onPress={() => props.navigation.goBack()}
+          text="Done"
+        />
+      ),
+    });
+  }, [])
 
   const setSystemTheme = (theme) => {
-    props.updateAppTheme(theme);
-    props.navigation.pop(1);
-  };
+    props.updateAppTheme(theme)
+    props.navigation.pop(1)
+  }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{flex: 1}}>
       <View style={styles.content}>
         <AppearanceList sections={settings} />
       </View>
@@ -87,4 +93,4 @@ const mapDispatchToProps = (dispatch) =>
     dispatch
   );
 
-export default connect(mapStateToProps, mapDispatchToProps)(Appearance);
+export default connect(mapStateToProps, mapDispatchToProps)(Options);

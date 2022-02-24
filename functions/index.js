@@ -121,17 +121,19 @@ async function getUserFirestoreInfo(user) {
         }
       })
       .catch((error) => {
+        console.log("Error getting Firestore user: " + error)
         reject(error);
       });
   });
 }
 
 async function createFirestoreUser(user) {
+  console.log("Creating new Firestore user")
   const ref = db.collection("users").doc(user._id);
   const newUser = {
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
+    firstName: user.firstName ?? "",
+    lastName: user.lastName ?? "",
+    email: user.email ?? "",
     id: user._id,
     status: "free",
   };

@@ -7,6 +7,7 @@ import {
   Text as DefaultText,
   View as DefaultView,
   ActivityIndicator as DefaultActivityIndicator,
+  RefreshControl as DefaultRefreshControl,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -87,7 +88,7 @@ export function Header(props) {
 // –––– TEXTFIELDS –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– //
 
 export function TextField(props) {
-  const { fieldRef, style, lightColor, darkColor, icon, ...otherProps } = props;
+  const { fieldRef, style, lightColor, darkColor, icon, disabled, ...otherProps } = props;
   const color = useThemeColor(
     { light: lightColor, dark: darkColor },
     "primary"
@@ -114,6 +115,7 @@ export function TextField(props) {
         />
       )}
       <TextInput
+        editable={!disabled}
         ref={fieldRef}
         style={[{ color }, fieldStyles.textField, style]}
         placeholderTextColor={placeholderColor}
@@ -335,6 +337,18 @@ export function ActivityIndicator(props) {
 
   return (
     <DefaultActivityIndicator {...otherProps} size="large" color={color} />
+  );
+}
+
+export function RefreshControl(props) {
+  const { style, lightColor, darkColor, ...otherProps } = props;
+  const color = useThemeColor(
+    { light: lightColor, dark: darkColor },
+    "secondary"
+  );
+
+  return (
+    <DefaultRefreshControl {...otherProps} size="large" color={[color]} tintColor={color} />
   );
 }
 

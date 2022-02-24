@@ -1,4 +1,5 @@
 import React from "react";
+import * as Analytics from "expo-firebase-analytics";
 import { StyleSheet } from "react-native";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
@@ -27,6 +28,7 @@ class EditItem extends React.Component {
   }
 
   componentDidMount() {
+    Analytics.logEvent("screen_view", { screen_name: this.props.route.name });
     // setup navigation header options
     // this.props.navigation.setOptions({
     //   headerRight: () => (

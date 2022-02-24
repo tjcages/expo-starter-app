@@ -1,16 +1,13 @@
 import React from "react";
+import * as Analytics from "expo-firebase-analytics";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import { useRoute } from "@react-navigation/native";
 
 import { revokeAuthToken } from "../api/auth";
 import { selectSite } from "../api/sites";
 
-import { StyleSheet } from "react-native";
+import { StyleSheet, FlatList } from "react-native";
 import { View, StatusBar } from "../components";
-
-import SitesList from "../views/SitesList";
-import NavigationButton from "../shared/NavigationButton";
 
 import {
   getCurrentAuthorizationInfo,
@@ -18,14 +15,21 @@ import {
 } from "../api/auth";
 import { listSites } from "../api/sites";
 
-class Home extends React.Component {
+import SiteItem from "../views/SiteItem";
+import SiteNotice from "../views/SiteNotice";
+import NavigationButton from "../shared/NavigationButton";
+
+class Sites extends React.Component {
   constructor(props) {
     super(props);
 
     this.onSelectHandler = this.onSelectHandler.bind(this);
+    this.getCurrentData = this.getCurrentData.bind(this);
   }
 
   componentDidMount() {
+    Analytics.logEvent("screen_view", { screen_name: this.props.route.name });
+
     // setup navigation header options
     this.props.navigation.setOptions({
       headerRight: () => (
@@ -71,13 +75,53 @@ class Home extends React.Component {
     this.props.selectSite(item._id);
   }
 
+  getCurrentData() {
+    if (this.props.sites) {
+      const sites = this.props.sites.map((a) => {
+        return { ...a };
+      });
+      if (
+        sites.length > 1 &&
+        this.props.user &&
+        this.props.user.status &&
+        this.props.user.status === "free"
+      ) {
+        const sitesNotice = {
+          type: "notice",
+        };
+        sites.splice(1, 0, sitesNotice);
+      }
+      return sites;
+    }
+    return [];
+  };
+
   render() {
     return (
       <View style={styles.container}>
-        <SitesList
-          {...this.props}
-          onSelect={(item) => this.onSelectHandler(item)}
-        />
+        <View style={styles.container}>
+          <FlatList
+            data={this.getCurrentData()}
+            keyExtractor={(item, index) => item + index}
+            renderItem={({ item, index }) => {
+              switch (item.type) {
+                case "notice":
+                  return <SiteNotice />;
+                default:
+                  return (
+                    <SiteItem
+                      {...this.props}
+                      item={item}
+                      index={index}
+                      onSelect={this.onSelectHandler}
+                    />
+                  );
+              }
+            }}
+            contentContainerStyle={{ paddingVertical: 164 }}
+            stickySectionHeadersEnabled={false}
+          />
+        </View>
 
         <StatusBar />
       </View>
@@ -107,4 +151,4 @@ const mapDispatchToProps = (dispatch) =>
     dispatch
   );
 
-export default connect(mapStateToProps, mapDispatchToProps)(Home);
+export default connect(mapStateToProps, mapDispatchToProps)(Sites);

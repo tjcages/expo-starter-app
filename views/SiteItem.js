@@ -9,8 +9,11 @@ import {
 import { Icon } from "react-native-elements";
 import Colors from "../constants/Colors";
 import { useThemeColor, Header, Text, Container } from "../components";
+import * as WebBrowser from "expo-web-browser";
 
 import { timeAgo } from "../utils";
+
+import NavigationButton from "../shared/NavigationButton";
 
 const SiteItem = (props) => {
   const disabled =
@@ -21,6 +24,17 @@ const SiteItem = (props) => {
     { light: Colors.light.background, dark: Colors.dark.highlight },
     "highlight"
   );
+
+  const handleWebLink = (link) => {
+    WebBrowser.openBrowserAsync(link);
+  };
+
+  var domain = "";
+  const siteId = props.item._id;
+  if (props.domains) {
+    const domains = props.domains[siteId];
+    if (domains && domains.length > 0) domain = `https://${domains[0].name}`;
+  }
 
   return (
     <TouchableOpacity
@@ -47,19 +61,35 @@ const SiteItem = (props) => {
             }}
           />
         )}
-        <Container style={[styles.content]}>
-          <Header style={props.item.color && { color: props.item.color }}>
-            {props.item.name}
-          </Header>
-          {props.item.lastPublished && (
-            <Text style={{ marginTop: 8, flex: 1, flexWrap: "wrap" }}>
-              Updated{" "}
-              {timeAgo.format(
-                new Date(props.item.lastPublished),
-                "round-minute"
-              )}
-            </Text>
-          )}
+        <Container style={styles.grid}>
+          <Container style={[styles.content]}>
+            <Header
+              style={[
+                props.item.color && { color: props.item.color },
+                { flex: 1 },
+              ]}
+            >
+              {props.item.name}
+            </Header>
+            {props.item.lastPublished && (
+              <Text style={{ marginTop: 8, flex: 1, flexWrap: "wrap" }}>
+                Updated{" "}
+                {timeAgo.format(
+                  new Date(props.item.lastPublished),
+                  "round-minute"
+                )}
+              </Text>
+            )}
+          </Container>
+          <NavigationButton
+            onPress={() => {
+              console.log(domain);
+              handleWebLink(domain);
+            }}
+            disabled={!domain}
+            icon={"external-link"}
+            style={{ padding: 12 }}
+          />
         </Container>
       </View>
       {props.item.type === "option" && (
@@ -93,8 +123,15 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 200,
   },
+  grid: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   content: {
-    padding: 12,
+    flex: 1,
+    padding: 16,
   },
 });
 

@@ -1,15 +1,23 @@
 import React from "react";
-import { StyleSheet } from "react-native";
+import * as Analytics from "expo-firebase-analytics";
+import { StyleSheet, FlatList } from "react-native";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 
 import { revokeAuthToken } from "../api/auth";
 import { selectSite } from "../api/sites";
-import { selectCollection } from "../api/collections";
+import { selectCollection, listCollections } from "../api/collections";
 
-import { View, NavButton, StatusBar } from "../components";
+import {
+  View,
+  NavButton,
+  Header,
+  StatusBar,
+  RefreshControl,
+} from "../components";
 
-import CollectionList from "../views/CollectionList";
+import CollectionItem from "../views/CollectionItem";
+import ListHeader from "../shared/ListHeader";
 
 class Collections extends React.Component {
   constructor(props) {
@@ -19,6 +27,7 @@ class Collections extends React.Component {
       return site._id === props.selectedSite;
     })[0];
 
+    this.onRefresh = this.onRefresh.bind(this);
     this.onSelectHandler = this.onSelectHandler.bind(this);
 
     this.state = {
@@ -27,6 +36,7 @@ class Collections extends React.Component {
   }
 
   componentDidMount() {
+    Analytics.logEvent("screen_view", { screen_name: this.props.route.name });
     // setup navigation header options
     this.props.navigation.setOptions({
       headerRight: () => (
@@ -54,6 +64,10 @@ class Collections extends React.Component {
     this._unsubscribe();
   }
 
+  onRefresh() {
+    this.props.listCollections(this.props.token, this.props.selectedSite);
+  }
+
   onSelectHandler(item) {
     this.props.selectCollection(item._id);
   }
@@ -61,11 +75,38 @@ class Collections extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <CollectionList
-          {...this.props}
-          site={this.state.site}
-          onSelect={(item) => this.onSelectHandler(item)}
-        />
+        <View style={styles.container}>
+          {this.props.collections && this.props.collections.length > 0 ? (
+            <FlatList
+              data={this.props.collections}
+              keyExtractor={(item, index) => item + index}
+              renderItem={({ item, index }) => {
+                return (
+                  <CollectionItem
+                    {...this.props}
+                    item={item}
+                    index={index}
+                    onSelect={this.onSelectHandler}
+                  />
+                );
+              }}
+              contentContainerStyle={{ paddingVertical: 164 }}
+              stickySectionHeadersEnabled={false}
+              ListHeaderComponent={
+                <ListHeader {...this.props} title={this.state.site.name} />
+              }
+              refreshControl={
+                <RefreshControl
+                  onRefresh={() => this.onRefresh()}
+                />
+              }
+            />
+          ) : (
+            <View style={styles.emptyView}>
+              <Header>No collections</Header>
+            </View>
+          )}
+        </View>
 
         <StatusBar />
       </View>
@@ -77,8 +118,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  button: {
-    backgroundColor: "transparent",
+  headerContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginHorizontal: 16,
+  },
+  header: { fontWeight: "600", marginBottom: 16 },
+  emptyView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
@@ -89,6 +139,7 @@ const mapDispatchToProps = (dispatch) =>
       revokeAuthToken,
       selectSite,
       selectCollection,
+      listCollections,
     },
     dispatch
   );
