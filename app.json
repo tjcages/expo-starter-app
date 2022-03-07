@@ -1,21 +1,23 @@
 {
   "expo": {
-    "name": "webflow-cms",
-    "slug": "webflow-cms",
-    "version": "1.1.5",
+    "name": "starter",
+    "slug": "starter",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
+    "scheme": "starter",
+    "userInterfaceStyle": "automatic",
     "updates": {
       "fallbackToCacheTimeout": 0
     },
     "assetBundlePatterns": ["assets/images/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.tylerjcagle.webflow-cms",
+      "bundleIdentifier": "com.tylerj.starter",
       "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
-      "package": "com.tylerjcagle.webflowcms",
+      "package": "com.tylerj.starter",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
@@ -26,13 +28,13 @@
       "favicon": "./assets/images/favicon.png",
       "config": {
         "firebase": {
-          "apiKey": "AIzaSyANN5Zj0o0e1tU0q5gM5NNqvKPGWhd5kBE",
-          "authDomain": "webflow-cms-e1766.firebaseapp.com",
-          "projectId": "webflow-cms-e1766",
-          "storageBucket": "webflow-cms-e1766.appspot.com",
-          "messagingSenderId": "829188664090",
-          "appId": "1:829188664090:web:ed4462f7fe13f27ebc1aa3",
-          "measurementId": "G-XJZ73Z1XYF"
+          "apiKey": "AIzaSyDPLhqimd-1wINpjOa9c9VQrbUIJHundRQ",
+          "authDomain": "splice-282b0.firebaseapp.com",
+          "projectId": "splice-282b0",
+          "storageBucket": "splice-282b0.appspot.com",
+          "messagingSenderId": "594942079912",
+          "appId": "1:594942079912:web:85b5a1a9561a4b919de39d",
+          "measurementId": "G-YFG3EJZG8P"
         }
       }
     }

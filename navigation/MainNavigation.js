@@ -5,55 +5,146 @@ import {
   DarkTheme,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-import { getTheme } from "../components";
+import { getTheme, useThemeColor } from "../components";
+import { Icon } from "react-native-elements";
 
-import Sites from "../screens/Sites";
-import Collections from "../screens/Collections";
-import Items from "../screens/Items";
-import EditItem from "../screens/EditItem";
-import Publish from "../screens/Publish";
+import Inbox from "../screens/Home";
+import Search from "../screens/Search";
 import Settings from "../screens/Settings";
-import Appearance from "../screens/Appearance";
-import Options from "../screens/Options";
+import Preferences from "../screens/Preferences";
 
+const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
+const MiddleStack = createNativeStackNavigator();
+const SettingsStack = createNativeStackNavigator();
 
 const Navigation = (props) => {
   const theme = props.theme === "system" ? getTheme() : props.theme;
+  const background = useThemeColor({}, "background")
+  const container = useThemeColor({}, "container")
 
   const HomeScreens = () => (
-    <NavigationContainer theme={theme === "dark" ? DarkTheme : DefaultTheme}>
-      <HomeStack.Navigator
+    <HomeStack.Navigator
+      screenOptions={{
+        headerLargeTitle: true,
+        headerTransparent: true,
+        headerBlurEffect: theme,
+        headerStyle: {
+          backgroundColor: background
+        }
+      }}
+    >
+      <HomeStack.Screen
+        name="Inbox"
+        component={Inbox}
         screenOptions={{
-          headerLargeTitle: true,
-          headerTransparent: true,
-          headerBlurEffect: theme,
+          headerSearchBarOptions: {
+            autoFocus: true,
+          },
+        }}
+      />
+
+      <HomeStack.Group
+        screenOptions={{
+          presentation: "modal",
+          headerStyle: {
+            marginTop: 12,
+          },
         }}
       >
-        <HomeStack.Screen name="Sites" component={Sites} />
-        <HomeStack.Screen name="Collections" component={Collections} />
-        <HomeStack.Screen name="Items" component={Items} />
-        <HomeStack.Screen name="EditItem" component={EditItem} />
+        {/* <HomeStack.Screen name="Publish" component={Publish} /> */}
+      </HomeStack.Group>
+    </HomeStack.Navigator>
+  );
 
-        <HomeStack.Group
-          screenOptions={{
-            presentation: "modal",
-            headerStyle: {
-              marginTop: 12,
-            },
+  const MiddleScreens = () => (
+    <MiddleStack.Navigator
+      screenOptions={{
+        headerLargeTitle: true,
+        headerTransparent: true,
+        headerBlurEffect: theme,
+        headerStyle: {
+          backgroundColor: background
+        }
+      }}
+    >
+      <MiddleStack.Screen name="Search" component={Search} />
+    </MiddleStack.Navigator>
+  );
+
+  const SettingsScreens = () => (
+    <SettingsStack.Navigator
+      screenOptions={{
+        headerLargeTitle: true,
+        headerTransparent: true,
+        headerBlurEffect: theme,
+        headerShadowVisible: true,
+        headerStyle: {
+          backgroundColor: background
+        }
+      }}
+    >
+      <SettingsStack.Screen name="Settings" component={Settings} />
+
+      <SettingsStack.Group
+        screenOptions={{
+          presentation: "modal",
+          headerStyle: {
+            backgroundColor: container
+          },
+        }}
+      >
+        <SettingsStack.Screen name="Preferences" component={Preferences} />
+      </SettingsStack.Group>
+    </SettingsStack.Navigator>
+  );
+
+  const render = () => (
+    <NavigationContainer ref={props.navRef} theme={theme === "dark" ? DarkTheme : DefaultTheme}>
+      <Tab.Navigator
+        screenOptions={{
+          headerShown: false,
+          tabBarHideOnKeyboard: true,
+          tabBarStyle: { paddingHorizontal: 24, backgroundColor: background },
+        }}
+      >
+        <Tab.Screen
+          name="Home"
+          component={HomeScreens}
+          options={{
+            tabBarShowLabel: false,
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="home" type="feather" color={color} size={24} />
+            ),
           }}
-        >
-          <HomeStack.Screen name="Publish" component={Publish} />
-          <HomeStack.Screen name="Settings" component={Settings} />
-          <HomeStack.Screen name="Appearance" component={Appearance} />
-          <HomeStack.Screen name="Options" component={Options} />
-        </HomeStack.Group>
-      </HomeStack.Navigator>
+        />
+        <Tab.Screen
+          name="Middle"
+          component={MiddleScreens}
+          options={{
+            tabBarShowLabel: false,
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="search" type="feather" color={color} size={24} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="SettingsTab"
+          component={SettingsScreens}
+          options={{
+            tabBarShowLabel: false,
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="user" type="feather" color={color} size={24} />
+            ),
+          }}
+        />
+      </Tab.Navigator>
     </NavigationContainer>
   );
 
-  return HomeScreens();
+  return render();
 };
 
 export default Navigation;

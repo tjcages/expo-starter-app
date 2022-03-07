@@ -16,7 +16,7 @@ const Navigation = (props) => {
   const theme = props.theme === "system" ? getTheme() : props.theme
 
   const LoginScreens = () => (
-    <NavigationContainer theme={theme === "dark" ? DarkTheme : DefaultTheme}>
+    <NavigationContainer ref={props.navRef} theme={theme === "dark" ? DarkTheme : DefaultTheme}>
       <LoginStack.Navigator
         screenOptions={{
           headerShown: false
@@ -30,7 +30,6 @@ const Navigation = (props) => {
     </NavigationContainer>
   );
 
-  // determine if the user has already been authenticated
   return LoginScreens();
 };
 

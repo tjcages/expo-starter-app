@@ -1,165 +1,212 @@
+import firebase from "firebase";
 import * as Types from "../store/types";
-import getEnvVars from "../environment";
 
-import { db } from "./firebase";
+import { createUser, updateUser, createInitialUserPreferences } from "./user";
+import { auth } from "./firebase";
 
-const { clientId, clientSecret } = getEnvVars();
+export const onSignInGoogle = (googleIdToken) => (dispatch) => {
+  // show loading indicator
+  dispatch({ type: Types.UPDATE_LOADING_STATE, payload: { loading: true } });
 
-export const getAccessToken = (code) => (dispatch) => {
-  //GET request
-  fetch("https://api.webflow.com/oauth/access_token", {
-    method: "POST",
-    body: `client_id=${clientId}&client_secret=${clientSecret}&code=${code}&grant_type=authorization_code`,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-  })
-    .then((response) => response.json())
-    //If response is in json then in success
-    .then((responseJson) => {
-      //Success
-      return dispatch({
-        type: Types.UPDATE_WEBFLOW_TOKEN,
-        payload: { token: responseJson.access_token },
+  // we need to register an Observer on Firebase Auth to make sure auth is initialized.
+  var unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+    unsubscribe();
+    // create the correct credential using our google id token
+    var credential = firebase.auth.GoogleAuthProvider.credential({
+      idToken: googleIdToken,
+    });
+
+    // Sign in with credential from the Google user.
+    auth
+      .signInWithCredential(credential)
+      .then((result) => {
+        if (result.additionalUserInfo.isNewUser) {
+          // if user doesn't exist, create one
+          createUser(result)
+            .then((user) => {
+              // successful creation
+              // create initial user preferences
+              const preferences = createInitialUserPreferences(user);
+              // save to redux store & end loading
+              return [
+                dispatch({ type: Types.UPDATE_USER, payload: { user } }),
+                dispatch({
+                  type: Types.UPDATE_USER_PREFERENCES,
+                  payload: { preferences },
+                }),
+                dispatch({
+                  type: Types.UPDATE_LOADING_STATE,
+                  payload: { loading: false },
+                }),
+              ];
+            })
+            .catch((error) => {
+              // issue creating new user
+              console.log("Error: " + error);
+              return [
+                dispatch({
+                  type: Types.UPDATE_USER,
+                  payload: { user: null },
+                }),
+                dispatch({
+                  type: Types.UPDATE_LOADING_STATE,
+                  payload: { loading: false },
+                }),
+              ];
+            });
+        } else {
+          // user exists, update last login
+          updateUser(result)
+            .then((user) => {
+              // successful update
+              // save to redux store & end loading
+              return [
+                dispatch({ type: Types.UPDATE_USER, payload: { user } }),
+                dispatch({
+                  type: Types.UPDATE_LOADING_STATE,
+                  payload: { loading: false },
+                }),
+              ];
+            })
+            .catch((error) => {
+              // issue updating user
+              console.log("Error: " + error);
+              return [
+                dispatch({
+                  type: Types.UPDATE_USER,
+                  payload: { user: null },
+                }),
+                dispatch({
+                  type: Types.UPDATE_LOADING_STATE,
+                  payload: { loading: false },
+                }),
+              ];
+            });
+        }
+      })
+      .catch((error) => {
+        // handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // the email of the user's account used.
+        var email = error.email;
+        // the firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+
+        const err = { errorCode, errorMessage, email, credential };
+        console.log("Firebase Signin Error: ", err);
       });
-    })
-    //If response is not in json then in error
-    .catch((error) => {
-      //Error
-      console.log("Error getting access token: " + error.message);
-      // alert(JSON.stringify(error));
-      return dispatch({
-        type: Types.UPDATE_WEBFLOW_TOKEN,
-        payload: { token: null },
-      });
-    });
-};
-
-export const getCurrentAuthorizationInfo = (bearer) => (dispatch) => {
-  //GET request
-  fetch("https://api.webflow.com/info", {
-    method: "GET",
-    headers: {
-      "Accept-Version": "1.0.0",
-      Authorization: `Bearer ${bearer}`,
-    },
-  })
-    .then((response) => response.json())
-    //If response is in json then in success
-    .then((responseJson) => {
-      //Success
-      return dispatch({
-        type: Types.UPDATE_AUTHORIZATION_ACCESS,
-        payload: { authorization: responseJson },
-      });
-    })
-    //If response is not in json then in error
-    .catch((error) => {
-      //Error
-      // alert(JSON.stringify(error));
-      console.error(error);
-    });
-};
-
-export const revokeAuthToken = (bearer) => (dispatch) => {
-  //GET request
-  fetch("https://api.webflow.com/oauth/revoke_authorization", {
-    method: "POST",
-    body: `client_id=${clientId}&client_secret=${clientSecret}&access_token=${bearer}`,
-    headers: {
-      "Accept-Version": "1.0.0",
-      Authorization: `Bearer ${bearer}`,
-    },
-  })
-    .then((response) => response.json())
-    //If response is in json then in success
-    .then((responseJson) => {
-      // Sign-out successful.
-      //Success
-      return [
-        dispatch({
-          type: Types.REVOKE_AUTHORIZATION,
-          payload: { token: null, authorization: null },
-        }),
-        dispatch({
-          type: Types.REMOVE_ALL,
-          payload: {},
-        }),
-      ];
-    })
-    //If response is not in json then in error
-    .catch((error) => {
-      //Error
-      // alert(JSON.stringify(error));
-      console.error(error);
-    });
-};
-
-export const getCurrentAuthorizedUser = (bearer) => (dispatch) => {
-  //GET request
-  fetch("https://api.webflow.com/user", {
-    method: "GET",
-    headers: {
-      "Accept-Version": "1.0.0",
-      Authorization: `Bearer ${bearer}`,
-    },
-  })
-    .then((response) => response.json())
-    //If response is in json then in success
-    .then((responseJson) => {
-      //Success
-      manageFirestoreDatabase(responseJson.user)
-        .then((user) => {
-          return dispatch({
-            type: Types.UPDATE_USER,
-            payload: { user: user },
-          });
-        })
-        .catch((error) => {
-          //Error
-          console.log("Error saving to Firestore");
-          // alert(JSON.stringify(error));
-          console.error(error);
-        });
-    })
-    //If response is not in json then in error
-    .catch((error) => {
-      //Error
-      // alert(JSON.stringify(error));
-      console.error(error);
-    });
-};
-
-const manageFirestoreDatabase = async (user) => {
-  const ref = db.collection("users").doc(user._id);
-  const firestoreUser = await ref.get().then(async (doc) => {
-    if (doc.exists) {
-      // user already exists, pass the whole object back
-      return doc.data();
-    } else {
-      // user doesn't exist, create one
-      const newUser = {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        id: user._id,
-        status: "free",
-      };
-      return await ref
-        .set(newUser)
-        .then(() => {
-          console.log("Firestore: New user successfully created");
-          return newUser;
-        })
-        .catch((error) => {
-          console.error("Error writing document: ", error);
-          return null;
-        });
-    }
   });
+};
 
-  if (firestoreUser) {
-    return Promise.resolve(firestoreUser);
-  }
-  return Promise.reject("Error creating user in Firestore");
+export const onSignInApple = (appleIdToken) => (dispatch) => {
+  // show loading indicator
+  dispatch({ type: Types.UPDATE_LOADING_STATE, payload: { loading: true } });
+
+  // we need to register an Observer on Firebase Auth to make sure auth is initialized.
+  var unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+    unsubscribe();
+    // build Firebase credential with the Apple ID token.
+    const provider = new firebase.auth.OAuthProvider("apple.com");
+    provider.addScope("email");
+    provider.addScope("name");
+
+    const credential = provider.credential({
+      idToken: appleIdToken,
+    });
+
+    // sign in with credential from the Apple user.
+    auth
+      .signInWithCredential(credential)
+      .then((result) => {
+        if (result.additionalUserInfo.isNewUser) {
+          // if user doesn't exist, create one
+          createUser(result)
+            .then((user) => {
+              // successful creation
+              // create initial user preferences
+              const preferences = createInitialUserPreferences(user);
+              // save to redux store & end loading
+              return [
+                dispatch({ type: Types.UPDATE_USER, payload: { user } }),
+                dispatch({
+                  type: Types.UPDATE_USER_PREFERENCES,
+                  payload: { preferences },
+                }),
+                dispatch({
+                  type: Types.UPDATE_LOADING_STATE,
+                  payload: { loading: false },
+                }),
+              ];
+            })
+            .catch((error) => {
+              // issue creating new user
+              console.log("Error: " + error);
+              return [
+                dispatch({
+                  type: Types.UPDATE_USER,
+                  payload: { user: null },
+                }),
+                dispatch({
+                  type: Types.UPDATE_LOADING_STATE,
+                  payload: { loading: false },
+                }),
+              ];
+            });
+        } else {
+          // user exists, update last login
+          updateUser(result)
+            .then((user) => {
+              // successful update
+              // save to redux store & end loading
+              return [
+                dispatch({ type: Types.UPDATE_USER, payload: { user } }),
+                dispatch({
+                  type: Types.UPDATE_LOADING_STATE,
+                  payload: { loading: false },
+                }),
+              ];
+            })
+            .catch((error) => {
+              // issue updating user
+              console.log("Error: " + error);
+              return [
+                dispatch({
+                  type: Types.UPDATE_USER,
+                  payload: { user: null },
+                }),
+                dispatch({
+                  type: Types.UPDATE_LOADING_STATE,
+                  payload: { loading: false },
+                }),
+              ];
+            });
+        }
+      })
+      .catch((error) => {
+        // handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // the email of the user's account used.
+        var email = error.email;
+        // the firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+
+        const err = { errorCode, errorMessage, email, credential };
+        console.log("Firebase Signin Error: ", err);
+      });
+  });
+};
+
+export const signOut = () => {
+  // sign out of Firebase Authentication
+  auth.signOut();
+};
+
+export const revokeReduxStore = () => (dispatch) => {
+  // remove all redux store persistent fields
+  return dispatch({
+    type: Types.REMOVE_ALL,
+    payload: {},
+  });
 };

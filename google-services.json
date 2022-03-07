@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "594942079912",
+    "project_id": "splice-282b0",
+    "storage_bucket": "splice-282b0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:594942079912:android:bb31567aa8f0b4a09de39d",
+        "android_client_info": {
+          "package_name": "com.tylerj.splice"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "594942079912-magmv11s4vrnrv1gvteonsgc44l0e74h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDj2Tb5PhpBEV8SUGDhQLDXmrkcpc34aRw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "594942079912-magmv11s4vrnrv1gvteonsgc44l0e74h.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "594942079912-o9f6uq1nkdjdv29r96p6o8qmru0stv03.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tylerj.splice"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
