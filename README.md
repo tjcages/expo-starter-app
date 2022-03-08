@@ -59,13 +59,13 @@ Initially the app should run fine using my existing Firebase & Google Cloud Plat
 Please replace these credentials with your own to be sure you have full control over your own data and authenticated users.
 
 ### Firebase setup
-First, [Add a Project to your Firebase account](https://console.firebase.google.com/u/0/).
+1. First, [Add a Project to your Firebase account](https://console.firebase.google.com/u/0/).
 
-Give this project a name, make sure Google Analytics is checked, and create the project.
+2. Give this project a name, make sure Google Analytics is checked, and create the project.
 
-Once the project is initialized, click `Web` to add Firebase to the app. Give a nickname to the web app like `{your-project-name}-web`.
+3. Once the project is initialized, click `Web` to add Firebase to the app. Give a nickname to the web app like `{your-project-name}-web`.
 
-Copy the `firebaseConfig` object and paste this object in the `config.js` file in your code. 
+4. Copy the `firebaseConfig` object and paste this object in the `config.js` file in your code. 
 
 It should look like this once you're done (with your own values):
 ```js
@@ -81,40 +81,34 @@ export const firebaseConfig = {
   measurementId: "G-YFG3EJZG8P"
 };
 ```
-Navigate to the `app.json` file in your code and replace the current values for `config.firebase` with your new values.
+5. Navigate to the `app.json` file in your code and replace the current values for `config.firebase` with your new values.
 > If you skip this step, Google Analytics will not initiate properly.
 
-Click `Continue to console`.
+6. Click `Continue to console`.
 
-Navigate to your Project's Settings by clicking the gear icon in the Navigation Menu. Scroll down to `Your apps` and click `Add app`. Select iOS, enter the Bundle ID as it is in the `app.json`, give it a nickname (like "{your-project-name}-iOS"), and click `Register App`. Download the config file title `GoogleService-Info.plist` and replace the existing file in your code with this file. Click Next until you return back to the console.
+7. Navigate to your Project's Settings by clicking the gear icon in the Navigation Menu. Scroll down to `Your apps` and click `Add app`. Select iOS, enter the Bundle ID as it is in the `app.json`, give it a nickname (like "{your-project-name}-iOS"), and click `Register App`. Download the config file title `GoogleService-Info.plist` and replace the existing file in your code with this file. Click Next until you return back to the console.
 
 > Repeat steps, this time for Android (downloading the `google-services.json` file) and replacing in your code for Android apps.
 
 ### Authentication setup
-Head to the Authentication page by clicking it in the Navigation menu.
-
-First, click "Get started" to initialize Authentication. You will now see the list of selected Authentication providers. For this project, we will use Google and Apple sign in.
-
-Click `Google` and `Enable` then `Save`. Click `Add a new provider` then `Apple` and `Enable` then `Save`.
+1. Head to the Authentication page by clicking it in the Navigation menu.
+2. First, click "Get started" to initialize Authentication. You will now see the list of selected Authentication providers. For this project, we will use Google and Apple sign in.
+3. Click `Google` and `Enable` then `Save`. Click `Add a new provider` then `Apple` and `Enable` then `Save`.
 
 ### Google Cloud Platform setup
-[Sign into Google Cloud Platform](https://console.cloud.google.com/home/dashboard). In the top left, click on your current project then `New Project` and give it a name. The project will initialize.
-
-Select the Navigation menu, `APIs & Services`, then `OAuth consent screen`. Select `External` and `Create`. Enter your app's name, your email, a logo if applicable, a link to the application home page (or any link), link for privacy policy, and a link for terms of service.
-
-Click `Add Domain` under Authorized domains. Add the same application home page you added earlier as well as "expo.io". Finally, add your Developer contact information and click `Save and Continue`. Click `Save and Continue` again for each of the next steps until complete.
-
-Now we will go to the Credentials tab in the Navigation menu. Click `Create Credentials` and `OAuth Client ID`. Select `Web Application` for `Application type` and give it a name like "Web Client". For `Authorized JavaScript origins` click `Add URI` and add "https://auth.expo.io". For `Authorized redirect URIs` click `Add URI` and add "https://auth.expo.io/@{your-expo-username}/{your-project-name}" like "https://auth.expo.io/@tylerjcagle/starter". Finally click `Create` to create the OAuth Client.
-
-You should be presented with a popup that contains your newly created Client ID. Copy this key and navigate to `screens/Login.js`. Replace the value of `clientId` in the `Google.useIdTokenAuthRequest` request with your copied key.
-
-Navigate back to the Authentication page in Firebase and click on the Edit icon for Google. Expand the `Web SDK configuration` section and replace the existing `Web client ID` key with your new key. Navigate back to the popup and also copy the `Client Secret` key. Paste this value for `Web client secret` for your Google Provider in Firebase Authentication. Click `Save`.
+1. [Sign into Google Cloud Platform](https://console.cloud.google.com/home/dashboard). In the top left, click on your current project then `New Project` and give it a name. The project will initialize.
+2. Select the Navigation menu, `APIs & Services`, then `OAuth consent screen`. Select `External` and `Create`. Enter your app's name, your email, a logo if applicable, a link to the application home page (or any link), link for privacy policy, and a link for terms of service.
+3. Click `Add Domain` under Authorized domains. Add the same application home page you added earlier as well as "expo.io". Finally, add your Developer contact information and click `Save and Continue`. Click `Save and Continue` again for each of the next steps until complete.
+4. Now we will go to the Credentials tab in the Navigation menu. Click `Create Credentials` and `OAuth Client ID`. Select `Web Application` for `Application type` and give it a name like "Web Client". For `Authorized JavaScript origins` click `Add URI` and add "https://auth.expo.io". For `Authorized redirect URIs` click `Add URI` and add "https://auth.expo.io/@{your-expo-username}/{your-project-name}" like "https://auth.expo.io/@tylerjcagle/starter". 
+5. Finally click `Create` to create the OAuth Client.
+6. You should be presented with a popup that contains your newly created Client ID. Copy this key and navigate to `screens/Login.js`. Replace the value of `clientId` in the `Google.useIdTokenAuthRequest` request with your copied key.
+7. Navigate back to the Authentication page in Firebase and click on the Edit icon for Google. Expand the `Web SDK configuration` section and replace the existing `Web client ID` key with your new key. Navigate back to the popup and also copy the `Client Secret` key. Paste this value for `Web client secret` for your Google Provider in Firebase Authentication. Click `Save`.
 > Note: Firebase sometimes shows an 'Error updating Google' message – the key should still be saved properly.
 
-Now we will repeat the process to create an OAuth Client ID for iOS this time – keep in mind, you will also need to repeat the process for Android for Google Auth to correctly work with that platform as well. Follow the same initial steps as before, entering the Bundle ID and ensuring it matches that in your `app.json`. Click `Create`.
+8. Now we will repeat the process to create an OAuth Client ID for iOS this time – keep in mind, you will also need to repeat the process for Android for Google Auth to correctly work with that platform as well. Follow the same initial steps as before, entering the Bundle ID and ensuring it matches that in your `app.json`. 9. Click `Create`.
 > You do not need to replace any Firebase keys for iOS or Android – only Web
 
-Copy the newly created Client ID key and navigate back to `screens/Login.js`. Replace the value of `iosClientId` in the `Google.useIdTokenAuthRequest` request with your copied iOS key. 
+10. Copy the newly created Client ID key and navigate back to `screens/Login.js`. Replace the value of `iosClientId` in the `Google.useIdTokenAuthRequest` request with your copied iOS key. 
 > Perform the same steps (except adding `androidClientId`) for Android.
 
 ---
@@ -139,9 +133,9 @@ Currently, starter data is stored in `api/settings.js` for basic Settings functi
 ![Firestore App Admin example](https://uploads-ssl.webflow.com/5f162b0e0ce5746130d59063/6226e0f7a926ce643938e4df_Screen%20Shot%202022-03-07%20at%209.50.14%20PM.png)
 You should configure your Firestore based on the provided objects in `settings.js` for Settings, Policies, Appearance, and Notifications.
 
-#Final thoughts
-If you've made it this far, then thanks for sticking around! If you found this project useful or you have any feedback you can reach me on [Twitter](https://twitter.com/tj_cages). Hope you enjoy!! 🎉🎉
-
 ---
+
+## Final thoughts
+If you've made it this far, then thanks for sticking around! If you found this project useful or you have any feedback you can reach me on [Twitter](https://twitter.com/tj_cages). Hope you enjoy!! 🎉🎉
 
 Built by [Tyler J. ✌️](https://tylerj.me)
