@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import * as Analytics from "expo-firebase-analytics";
-import * as AppleAuthentication from 'expo-apple-authentication';
+import * as AppleAuthentication from "expo-apple-authentication";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { StyleSheet } from "react-native";
@@ -53,9 +53,9 @@ const Login = (props) => {
         ],
       });
       // signed in
-      props.onSignInApple(credential.identityToken)
+      props.onSignInApple(credential.identityToken);
     } catch (e) {
-      if (e.code === 'ERR_CANCELED') {
+      if (e.code === "ERR_CANCELED") {
         // handle that the user canceled the sign-in flow
       } else {
         // handle other errors
@@ -105,7 +105,6 @@ const Login = (props) => {
           />
           <Button
             text={"Continue with Apple"}
-            disabled={!request}
             onPress={() => {
               // trigger analytics event
               Analytics.logEvent(`Apple_login`, {
@@ -198,7 +197,7 @@ const mapDispatchToProps = (dispatch) =>
   bindActionCreators(
     {
       onSignInGoogle,
-      onSignInApple
+      onSignInApple,
     },
     dispatch
   );

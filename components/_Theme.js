@@ -1,3 +1,4 @@
+import React from 'react';
 import { Appearance } from "react-native"
 import reduxStore from "../store/store";
 import { Color } from "../constants";

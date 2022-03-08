@@ -38,7 +38,6 @@
     "react-native-safe-area-context": "3.3.2",
     "react-native-screens": "~3.10.1",
     "react-native-svg": "12.1.1",
-    "react-native-svg-transformer": "^1.0.0",
     "react-native-web": "0.17.1",
     "react-native-webview": "^11.17.2",
     "react-redux": "^7.2.6",
@@ -47,7 +46,8 @@
     "redux-thunk": "^2.4.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.9"
+    "@babel/core": "^7.12.9",
+    "react-native-svg-transformer": "^1.0.0"
   },
   "private": true
 }

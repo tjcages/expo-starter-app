@@ -1,3 +1,4 @@
+import React from 'react';
 import { TextInput, StyleSheet } from "react-native";
 import { useThemeColor } from "./_Theme";
 import { Color, Layout, Font } from "../constants";

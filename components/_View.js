@@ -1,3 +1,4 @@
+import React from 'react';
 import { View as DefaultView, StyleSheet } from "react-native";
 import { Layout } from "../constants";
 import { useThemeColor } from "./_Theme";

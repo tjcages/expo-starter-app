@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   ActivityIndicator as DefaultActivityIndicator,
   RefreshControl as DefaultRefreshControl,
