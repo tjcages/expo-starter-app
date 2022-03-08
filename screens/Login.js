@@ -34,6 +34,8 @@ const Login = (props) => {
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     clientId:
       "363530651033-gq3dbmh1dp95847okpplh0k8k2o220ob.apps.googleusercontent.com",
+    iosClientId:
+      "363530651033-ed4ipt5t82pe3aasrg2ob6v60the0ja1.apps.googleusercontent.com"
   });
 
   useEffect(() => {
