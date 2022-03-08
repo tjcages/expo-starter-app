@@ -22,7 +22,7 @@ export const loadSettings = (navigation) => (dispatch) => {
         payload: { settings: [] },
       });
     });
-    
+
   // get terms and privacy
   getPolicies()
     .then((policies) => {
@@ -157,17 +157,23 @@ export const loadPreferenceOptions = (preference) => {
 };
 
 const getPreferenceOptions = (preference) => {
-  return Promise.resolve(
-    db
-      .collection("App Admin")
+  return new Promise((resolve, reject) => {
+    db.collection("App Admin")
       .doc(preference)
       .get()
       .then((doc) => {
         if (doc.exists) {
-          return doc.data();
+          resolve(doc.data());
+        } else {
+          // no database values found, resort to starter values
+          console.log(
+            `NOTICE: Using static data. Create a Firestore ${preference} object to dynamically pull.`
+          );
+          const starterOptions = starterPreferenceOptions[preference]
+          resolve(starterOptions)
         }
-      })
-  );
+      });
+  });
 };
 
 const getPolicies = () => {
@@ -181,13 +187,13 @@ const getPolicies = () => {
           // Firebase has been configured, use database data
           const data = doc.data();
 
-          return data
+          return data;
         } else {
           // firebase has not been configured, default to static data
           console.log(
             "NOTICE: Using static data. Create a Firestore Policies object to dynamically pull."
           );
-          return starterPolicies
+          return starterPolicies;
         }
       })
   );
@@ -231,14 +237,14 @@ const starterSettings = {
       icon: "sun",
       link: "Preferences",
       title: "Appearance",
-      type: "navigate",
+      type: "preference",
     },
     {
       color: "#FE365E",
       icon: "bell",
       link: "Preferences",
       title: "Notifications",
-      type: "navigate",
+      type: "preference",
     },
   ],
   Options: [
@@ -252,5 +258,50 @@ const starterSettings = {
 
 const starterPolicies = {
   privacy: "https://www.webflow-cms.com/policies/privacy",
-  terms: "https://www.webflow-cms.com/policies/terms"
-}
+  terms: "https://www.webflow-cms.com/policies/terms",
+};
+
+const starterPreferenceOptions = {
+  Appearance: {
+    options: [
+      {
+        description: "Match your OS appearance",
+        title: "System",
+        type: "option",
+        value: "system",
+      },
+      {
+        title: "Dark",
+        type: "option",
+        value: "dark",
+      },
+      {
+        title: "Light",
+        type: "option",
+        value: "light",
+      },
+    ],
+  },
+  Notifications: {
+    options: [
+      {
+        enabled: false,
+        title: "@ mentions",
+        type: "switch",
+        value: "mentions",
+      },
+      {
+        enabled: true,
+        title: "New messages",
+        type: "switch",
+        value: "messages",
+      },
+      {
+        enabled: true,
+        title: "New friends",
+        type: "switch",
+        value: "friends",
+      },
+    ],
+  },
+};
