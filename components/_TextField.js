@@ -1,6 +1,8 @@
 import React from 'react';
 import { TextInput, StyleSheet } from "react-native";
-import { useThemeColor } from "./_Theme";
+import { Icon } from "react-native-elements";
+import { Container } from "./_View"
+import { useThemeColor, getTheme } from "./_Theme";
 import { Color, Layout, Font } from "../constants";
 
 export const TextField = (props) => {
