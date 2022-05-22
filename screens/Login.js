@@ -1,42 +1,45 @@
-import React, { useEffect } from "react";
-import * as Analytics from "expo-firebase-analytics";
-import * as AppleAuthentication from "expo-apple-authentication";
+import React, { useEffect, useState, useRef } from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import { StyleSheet } from "react-native";
-import { BlurView } from "expo-blur";
-import { WebView } from "react-native-webview";
-import { Layout, Font } from "../constants";
 
+// Expo
+import * as Analytics from "expo-firebase-analytics";
+import * as AppleAuthentication from "expo-apple-authentication";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
-import { SafeAreaView } from "react-native-safe-area-context";
 
-import { onSignInGoogle, onSignInApple } from "../api/auth";
-
+// Components
+import { FlatList, Dimensions, StyleSheet } from "react-native";
 import {
-  Container,
   View,
-  Text,
-  Header,
-  Button,
   StatusBar,
   getTheme,
+  useThemeColor,
+  getGradientColor,
 } from "../components";
+import { LinearGradient } from "expo-linear-gradient";
 
-import GoogleIcon from "../assets/icons/google.svg";
-import AppleIcon from "../assets/icons/apple.svg";
+// APIs
+import { onSignInGoogle, onSignInApple } from "../api/auth";
+
+// Views
+import IntroView from "../views/Login/IntroView";
+import DescriptiveView from "../views/Login/DescriptiveView";
 
 WebBrowser.maybeCompleteAuthSession();
 
 const Login = (props) => {
-  const theme = getTheme();
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     clientId:
       "363530651033-gq3dbmh1dp95847okpplh0k8k2o220ob.apps.googleusercontent.com",
     iosClientId:
-      "363530651033-ed4ipt5t82pe3aasrg2ob6v60the0ja1.apps.googleusercontent.com"
+      "363530651033-ed4ipt5t82pe3aasrg2ob6v60the0ja1.apps.googleusercontent.com",
   });
+
+  const [contentOffset, setContentOffset] = useState(0);
+  const scrollRef = useRef();
+  const windowHeight = Dimensions.get("window").height;
+  const limit = (windowHeight * 3) / 4;
 
   useEffect(() => {
     Analytics.logEvent("screen_view", { screen_name: props.route.name });
@@ -65,68 +68,73 @@ const Login = (props) => {
     }
   }
 
+  const background = useThemeColor({}, "background");
+  const clear = useThemeColor({}, "clear");
+  const gradient = getGradientColor()
+
   return (
     <View style={styles.container}>
-      <WebView
-        style={styles.image}
-        source={{
-          uri: "https://my.spline.design/spiralapp-95c732c53f110a24754112326ed79c2f/",
+      <FlatList
+        ref={scrollRef}
+        data={[1, 2, 3]}
+        keyExtractor={(item, index) => item + index}
+        renderItem={({ item, index }) => {
+          if (index === 0 || index === 2) {
+            return (
+              <IntroView
+                {...props}
+                request={request}
+                promptAsync={promptAsync}
+                promptAppleAsync={promptAppleAsync}
+                contentOffset={
+                  index === 0 && limit > contentOffset ? contentOffset : 0
+                }
+                windowHeight={windowHeight}
+                colorTop={gradient.colorTop}
+                colorBottom={gradient.colorBottom}
+              />
+            );
+          } else {
+            return (
+              <DescriptiveView
+                {...props}
+                contentOffset={contentOffset}
+                windowHeight={windowHeight}
+                colorTop={gradient.colorTop}
+                colorBottom={gradient.colorBottom}
+              />
+            );
+          }
         }}
+        onEndReachedThreshold={0}
+        onEndReached={() => {
+          scrollRef.current?.scrollToOffset({ animated: false, offset: 0 });
+          // scrollView.current.scrollTo({ x: 0, y: 0, animated: true })
+        }}
+        // removeClippedSubviews={true}
+        decelerationRate={"fast"}
+        disableIntervalMomentum={true}
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+        keyboardDismissMode="interactive"
+        // snapToInterval={windowHeight}
+        // snapToAlignment={"start"}
+        onScroll={({ nativeEvent }) => {
+          setContentOffset(nativeEvent.contentOffset.y);
+        }}
+        scrollEventThrottle={16}
       />
 
-      <View style={styles.content}>
-        <BlurView style={styles.blur} intensity={50} tint={theme} />
-        <Container style={styles.overlay} />
-        <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
-          <Header style={styles.header}>YOU can build an awesome app</Header>
-          <Text style={styles.text}>
-            An informative description would go here!
-          </Text>
-          <Button
-            text={"Get started"}
-            style={{ marginBottom: Layout.default.small }}
-            disabled={!request}
-            inverted={true}
-            onPress={() => {
-              // trigger analytics event
-              Analytics.logEvent(`Google_login`, {
-                sender: "Login",
-                purpose: `User selected Google Login to get started`,
-              });
-
-              promptAsync();
-            }}
-            icon={
-              <GoogleIcon
-                style={[
-                  theme === "dark" ? { color: "black" } : { color: "black" },
-                  styles.googleIcon,
-                ]}
-              />
-            }
-          />
-          <Button
-            text={"Continue with Apple"}
-            onPress={() => {
-              // trigger analytics event
-              Analytics.logEvent(`Apple_login`, {
-                sender: "Login",
-                purpose: `User selected Apple Login to get started`,
-              });
-
-              promptAppleAsync();
-            }}
-            icon={
-              <AppleIcon
-                style={[
-                  theme === "dark" ? { color: "black" } : { color: "white" },
-                  styles.googleIcon,
-                ]}
-              />
-            }
-          />
-        </SafeAreaView>
-      </View>
+      <LinearGradient
+        colors={[background, clear]}
+        style={[styles.gradient, { top: 0 }]}
+        pointerEvents="none"
+      />
+      <LinearGradient
+        colors={[clear, background]}
+        style={[styles.gradient, { bottom: 0 }]}
+        pointerEvents="none"
+      />
 
       <StatusBar />
     </View>
@@ -136,61 +144,14 @@ const Login = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    // justifyContent: "center",
+    alignItems: "center",
   },
-  image: {
+  gradient: {
     position: "absolute",
-    top: 0,
-    bottom: 0,
     left: 0,
     right: 0,
-    width: "100%",
-    height: "90%",
-    backgroundColor: "transparent",
-  },
-  content: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    justifyContent: "space-between",
-    backgroundColor: "transparent",
-    padding: Layout.default.large,
-    paddingTop: Layout.default.xLarge,
-    borderRadius: Layout.default.large,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    overflow: "hidden",
-  },
-  blur: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    top: 0,
-  },
-  overlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    top: 0,
-    opacity: 0.4,
-  },
-  header: {
-    fontSize: Font.size.xLarge,
-    fontWeight: Font.weight.bold,
-    marginBottom: Layout.default.small,
-    textAlign: "center",
-  },
-  text: {
-    marginTop: Layout.default.medium2,
-    marginBottom: Layout.default.xLarge,
-    textAlign: "center",
-  },
-  googleIcon: {
-    width: Layout.default.large,
-    height: Layout.default.large,
-    marginRight: Layout.default.medium2,
+    height: 124,
   },
 });
 

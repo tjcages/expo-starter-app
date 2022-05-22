@@ -21,5 +21,6 @@ export default {
     xLarge: 36,
     borderRadius: 10,
     borderRadiusSmall: 6,
+    borderRounded: 100
   },
 };

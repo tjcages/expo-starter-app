@@ -1,8 +1,10 @@
-import React from 'react';
+import React from "react";
 import {
   Text as DefaultText,
-  View as DefaultView,
+  View,
+  Animated,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   StyleSheet,
 } from "react-native";
 import { Icon, Button as DefaultButton } from "react-native-elements";
@@ -54,37 +56,61 @@ export const Button = (props) => {
   );
   const divider = useThemeColor({}, "highlight");
 
+  const animation = new Animated.Value(0);
+  const inputRange = [0, 1];
+  const outputRange = [1, 0.9];
+  const scale = animation.interpolate({ inputRange, outputRange });
+
+  const onPressIn = () => {
+    Animated.spring(animation, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+  const onPressOut = () => {
+    Animated.spring(animation, {
+      toValue: 0,
+      useNativeDriver: true,
+    }).start();
+  };
+
   return (
-    <TouchableOpacity
-      style={[
-        { backgroundColor },
-        inverted && {
-          backgroundColor: backgroundColor2,
-          borderColor: divider,
-          borderWidth: 1,
-        },
-        styles.button,
-        style,
-        (disabled || disabledTheme) && { opacity: 0.5 },
-        flex && { flex: 1 },
-      ]}
+    <TouchableWithoutFeedback
       {...otherProps}
       onPress={onPress}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
       disabled={disabled}
     >
-      <DefaultView style={[styles.buttonContainer]}>
-        {icon && icon}
-        <DefaultText
-          style={[
-            { color: defaultTextColor },
-            inverted && { color: primary },
-            styles.buttonText,
-          ]}
-        >
-          {text}
-        </DefaultText>
-      </DefaultView>
-    </TouchableOpacity>
+      <Animated.View
+        style={[
+          { backgroundColor },
+          inverted && {
+            backgroundColor: backgroundColor2,
+            borderColor: divider,
+            borderWidth: 1,
+          },
+          styles.button,
+          style,
+          (disabled || disabledTheme) && { opacity: 0.5 },
+          flex && { flex: 1 },
+          { transform: [{ scale }], opacity: scale },
+        ]}
+      >
+        <View style={[styles.buttonContainer]}>
+          {icon && icon}
+          <DefaultText
+            style={[
+              { color: defaultTextColor },
+              inverted && { color: primary },
+              styles.buttonText,
+            ]}
+          >
+            {text}
+          </DefaultText>
+        </View>
+      </Animated.View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -155,10 +181,18 @@ export const NavButton = (props) => {
 const styles = StyleSheet.create({
   button: {
     flexDirection: "row",
-    borderRadius: Layout.default.borderRadius,
+    justifyContent: "center",
     paddingVertical: Layout.default.medium2,
     paddingHorizontal: Layout.default.large,
-    justifyContent: "center",
+    borderRadius: Layout.default.borderRounded,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 12,
+    },
+    shadowOpacity: 0.16,
+    shadowRadius: 6,
+    elevation: 10,
   },
   navButton: {
     backgroundColor: "transparent",

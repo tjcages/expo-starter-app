@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "starter",
-    "slug": "starter",
+    "name": "Recap",
+    "slug": "recap",
     "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -13,11 +13,11 @@
     "assetBundlePatterns": ["assets/images/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.tylerj.starter",
+      "bundleIdentifier": "com.tylerj.recap",
       "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
-      "package": "com.tylerj.starter",
+      "package": "com.tylerj.recap",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"

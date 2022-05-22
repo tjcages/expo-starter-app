@@ -1,4 +1,4 @@
-import { useThemeColor, getTheme } from "./_Theme";
+import { useThemeColor, getTheme, getGradientColor } from "./_Theme";
 import { Text, Title, Header } from "./_Text";
 import { TextField } from "./_TextField";
 import { Button, NavButton } from "./_Button";
@@ -20,4 +20,5 @@ export {
   StatusBar,
   useThemeColor,
   getTheme,
+  getGradientColor,
 };
